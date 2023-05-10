@@ -8,6 +8,9 @@ using System.Security.Claims;
 
 namespace PTN.WebAPI.Controllers
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Controller]
     [Authorize]
     [Route("/")]
@@ -15,14 +18,23 @@ namespace PTN.WebAPI.Controllers
     {
         private readonly MongoDbService _mongoDbService;
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mongoDbService"></param>
         public TaskController(MongoDbService mongoDbService)
         {
             _mongoDbService = mongoDbService;
         }
 
+        /// <summary>
+        /// Get a token
+        /// </summary>
+        /// <param name="username"></param>
+        /// <returns></returns>
         [HttpGet]
         [AllowAnonymous]
-        public string Get(string username)
+        public string GetToken(string username)
         {
             var claims = new[]
             {
@@ -32,10 +44,23 @@ namespace PTN.WebAPI.Controllers
             var handler = new JwtSecurityTokenHandler().WriteToken(new JwtAuth().GetToken(claims));
 
             return handler;
-
-            //return _mongoDbService.getTasks();
         }
 
+        /// <summary>
+        /// Get the tasks
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("/get")]
+        public List<Tasks> GetTasks()
+        {
+            return _mongoDbService.getTasks();
+        }
+
+        /// <summary>
+        /// Development specific method for testing tokens
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
         [HttpGet("ValidateToken")]
         [AllowAnonymous]
         public bool Validate(string token)
@@ -47,18 +72,30 @@ namespace PTN.WebAPI.Controllers
             return false;
         }
 
+        /// <summary>
+        /// For creating tasks
+        /// </summary>
+        /// <param name="tasks"></param>
         [HttpPost]
         public void Create([FromBody] Tasks tasks)
         {
             _mongoDbService.AddTask(tasks);
         }
 
+        /// <summary>
+        /// For updating tasks
+        /// </summary>
+        /// <param name="tasks"></param>
         [HttpPut]
         public void Update([FromBody] Tasks tasks)
         {
             _mongoDbService.UpdateTask(tasks);
         }
 
+        /// <summary>
+        /// For deleting tasks
+        /// </summary>
+        /// <param name="id"></param>
         [HttpDelete]
         public void Delete([FromBody] string id)
         {

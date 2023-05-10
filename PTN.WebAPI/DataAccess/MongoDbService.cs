@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using MongoDB.Bson;
-using MongoDB.Driver;
+﻿using MongoDB.Driver;
 using PTN.WebAPI.Models;
 
 namespace PTN.WebAPI.DataAccess
@@ -9,13 +7,16 @@ namespace PTN.WebAPI.DataAccess
     {
         private readonly IMongoCollection<Tasks> _tasksCollection;
 
-        public MongoDbService(IOptions<MongoDbSettings> mondoDbSettings)
-        {
-            MongoClient client = new MongoClient(mondoDbSettings.Value.ConnectionString);
-            IMongoDatabase database = client.GetDatabase(mondoDbSettings.Value.DatabaseName);
-            _tasksCollection = database.GetCollection<Tasks>(mondoDbSettings.Value.CollectionName);
-        }
+        private string connectionString = "mongodb+srv://fatihersy:fatih.ersy97@ptn-cluster.y3fywte.mongodb.net/?retryWrites=true&w=majority";
+        private string collectionName = "tasks";
+        private string databaseName = "PTN-Database";
 
+        public MongoDbService()
+        {
+            MongoClient client = new MongoClient(connectionString);
+            IMongoDatabase database = client.GetDatabase(databaseName);
+            _tasksCollection = database.GetCollection<Tasks>(collectionName);
+        }
 
         public List<Tasks> getTasks()
         {

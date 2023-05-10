@@ -1,13 +1,16 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
+using PTN.WebAPI.Auth;
 using PTN.WebAPI.DataAccess;
 using PTN.WebAPI.Models;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace PTN.WebAPI.Controllers
 {
     [Controller]
-    [Route("[controller]")]
+    [Authorize]
+    [Route("/")]
     public class TaskController : Controller
     {
         private readonly MongoDbService _mongoDbService;
@@ -17,16 +20,35 @@ namespace PTN.WebAPI.Controllers
             _mongoDbService = mongoDbService;
         }
 
-        // GET: TaskController
         [HttpGet]
-        public List<Tasks> Get()
+        [AllowAnonymous]
+        public string Get(string username)
         {
-            return _mongoDbService.getTasks();
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.Name, username)
+            };
+
+            var handler = new JwtSecurityTokenHandler().WriteToken(new JwtAuth().GetToken(claims));
+
+            return handler;
+
+            //return _mongoDbService.getTasks();
         }
 
-        // POST: TaskController/Create
+        [HttpGet("ValidateToken")]
+        [AllowAnonymous]
+        public bool Validate(string token)
+        {
+            var isValid = new JwtAuth().ValidateToken(token);
+
+            if (isValid != null) return true;
+
+            return false;
+        }
+
         [HttpPost]
-        public void Create([FromBody]Tasks tasks)
+        public void Create([FromBody] Tasks tasks)
         {
             _mongoDbService.AddTask(tasks);
         }
